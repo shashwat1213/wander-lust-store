@@ -1,6 +1,10 @@
-import { Controller, Post, Body, Req, Use } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { Controller, Post, Body, Req, UseGuards } from '@nestjs/common';
+import { Request } from 'express';
+import { AuthService, SafeUser } from './auth.service';
 import { Public } from './public.decorator';
+import { LocalAuthGuard } from './guards/local-auth.guard';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -8,21 +12,15 @@ export class AuthController {
 
   @Post('register')
   @Public()
-  async register(@Body() userData: {
-    email: string;
-    password: string;
-    firstName: string;
-    lastName: string;
-  }) {
-    return this.authService.register(userData);
+  async register(@Body() registerDto: RegisterDto) {
+    return this.authService.register(registerDto);
   }
 
   @Post('login')
   @Public()
-  async login(@Body() loginDto: {
-    email: string;
-    password: string;
-  }) {
-    return this.authService.login(loginDto);
+  @UseGuards(LocalAuthGuard)
+  async login(@Body() _loginDto: LoginDto, @Req() req: Request) {
+    // LocalAuthGuard has validated the credentials and populated req.user.
+    return this.authService.login(req.user as SafeUser);
   }
 }

@@ -48,8 +48,8 @@ model Category {
   description String?
   imageUrl    String?
   parentId    String?
-  parent      Category @relation("Categories", fields: [parentId], references: [id])
-  children    Category @relation("Categories")
+  parent      Category? @relation("Categories", fields: [parentId], references: [id])
+  children    Category[] @relation("Categories")
   products    Product[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -70,6 +70,8 @@ model Product {
   category    Category @relation(fields: [categoryId], references: [id])
   images      ProductImage[]
   variants    ProductVariant[]
+  orderItems  OrderItem[]
+  wishlistItems WishlistItem[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -92,6 +94,7 @@ model ProductVariant {
   sku       String   @unique
   priceAdjustment Decimal @db.Decimal(10, 2) @default(0)
   stock     Int      @default(0)
+  orderItems OrderItem[]
 }
 
 // Orders & Cart
@@ -105,8 +108,10 @@ model Order {
   shippingAmount Decimal @db.Decimal(10, 2)
   discountAmount Decimal @db.Decimal(10, 2)
   totalAmount   Decimal  @db.Decimal(10, 2)
-  shippingAddress ShippingAddress @embed
-  billingAddress  ShippingAddress @embed
+  shippingAddressId String
+  shippingAddress ShippingAddress @relation("OrderShippingAddress", fields: [shippingAddressId], references: [id])
+  billingAddressId  String
+  billingAddress  ShippingAddress @relation("OrderBillingAddress", fields: [billingAddressId], references: [id])
   items         OrderItem[]
   paymentId     String?   // Payment gateway transaction ID
   createdAt     DateTime @default(now())
@@ -129,12 +134,15 @@ model OrderItem {
 }
 
 model ShippingAddress {
+  id        String   @id @default(uuid())
   street    String
   city      String
   state     String
   postalCode String
   country   String
   phone     String?
+  shippingOrders Order[] @relation("OrderShippingAddress")
+  billingOrders  Order[] @relation("OrderBillingAddress")
 }
 
 // Wishlist

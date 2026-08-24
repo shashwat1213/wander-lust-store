@@ -1,4 +1,10 @@
 node_modules
+# Build output
+/dist
+
+# Test coverage
+/coverage
+
 # Keep environment variables out of version control
 .env
 

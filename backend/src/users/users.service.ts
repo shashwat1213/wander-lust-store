@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../common/prisma/prisma.service';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -21,7 +22,7 @@ export class UsersService {
     email: string;
     firstName: string;
     lastName: string;
-    role: string;
+    role: Role;
     isActive: boolean;
   }>) {
     return this.prisma.user.update({ where: { id }, data });
